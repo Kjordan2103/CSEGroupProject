@@ -61,7 +61,7 @@ def train():
             optimizer.step()
             running_loss += loss.item()
             if i % batch_size == 0:
-                print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss} updated git1')
+                print(f'[{epoch + 1}, {i + 1:5d}] average loss: {running_loss/batch_size} updated git1')
                 running_loss = 0.0
     print("reach end, proceeding to save...")
     path = './food.pth'

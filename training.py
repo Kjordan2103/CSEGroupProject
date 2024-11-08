@@ -34,8 +34,6 @@ def gpu_check():
     print(torch.cuda.is_available())  # This should return True if a GPU is available
     print(torch.cuda.current_device())  # This will return the current GPU ID (e.g., 0 for the first GPU)
     print(torch.cuda.get_device_name(0))  # This prints the name of the GPU, e.g., 'NVIDIA GeForce GTX 1080'
-    return 0
-gpu_check()
 def train():
     trainloader, _ = load_split_train_test()
     print(trainloader.dataset.classes)
@@ -63,7 +61,7 @@ def train():
             optimizer.step()
             running_loss += loss.item()
             if i % batch_size == 0:
-                print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss}')
+                print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss} updated git1')
                 running_loss = 0.0
     print("reach end, proceeding to save...")
     path = './food.pth'

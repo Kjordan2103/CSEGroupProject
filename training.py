@@ -6,15 +6,16 @@ import torchvision.models as models
 from torch.utils.data.sampler import SubsetRandomSampler
 import numpy as np
 from PIL import Image
-batch_size = 16
-train_dir = 'Fruits/fruits-360_dataset_100x100/fruits-360/Training' #path to be used for ImageFolder
-test_dir = 'Fruits/fruits-360_dataset_100x100/fruits-360/Test'
+batch_size = 64
+train_dir = '/content/CSEGroupProject/Fruits/fruits-360_dataset_100x100/fruits-360/Training' #path to be used for ImageFolder
+test_dir = '/content/CSEGroupProject/Fruits/fruits-360_dataset_100x100/fruits-360/Test'
 #splitting dataset into training and testing (80% used for training, rest for testing)
 def load_split_train_test(): 
     #transform parameters, using normalizations/resizes found in resnet18 documentation
     transform = transforms.Compose([
-        transforms.Resize(256),
-        transforms.RandomResizedCrop(224),  #random crop for more variability,increase accuracy
+        transforms.Resize(256),  
+        transforms.RandomResizedCrop(224),    
+        transforms.RandomRotation(8), 
         transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1), #color transforms to increase accuracy further
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
@@ -29,6 +30,9 @@ def load_split_train_test():
                    batch_size=batch_size)
     return trainloader, testloader
 ###########Remainder of logic is training logic#############
+#print(torch.cuda.is_available())  # This should return True if a GPU is available
+#print(torch.cuda.current_device())  # This will return the current GPU ID (e.g., 0 for the first GPU)
+#print(torch.cuda.get_device_name(0))  # This prints the name of the GPU, e.g., 'NVIDIA GeForce GTX 1080'
 def train():
     trainloader, _ = load_split_train_test()
     print(trainloader.dataset.classes)
@@ -41,10 +45,9 @@ def train():
     model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
     criterion = torch.nn.CrossEntropyLoss()
     #Medium article says Momentum is best optimizer for ResNet, trying that now
-    optimizer = torch.optim.SGD(model.fc.parameters(), lr=0.001, momentum= 0.9)
+    optimizer = torch.optim.SGD(model.fc.parameters(), lr=0.01, momentum= 0.9) #trying parameters seen in lecture, think lr too high before
     model.to(device)
-    epochs = 5 #using 4 epoch for now, may increase time permitting (10 too much, 1 too little)
-    steps = 0
+    epochs = 15 #using 15 epoch for now keep monitoring 
     running_loss = 0
     for epoch in range(epochs):
         for i, (inputs, labels) in enumerate(trainloader,0):
@@ -56,8 +59,9 @@ def train():
             loss.backward()
             optimizer.step()
             running_loss += loss.item()
-            if i % batch_size == 0:
-                print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / batch_size}')
+            #check every 3 batches
+            if i % (batch_size * 3) == 0:
+                print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / (batch_size * 3)}')
                 running_loss = 0.0
     print("reach end, proceeding to save...")
     path = './food.pth'
@@ -75,8 +79,9 @@ def load_model(model_path, num_classes):
 ########### New Test Function ###########
 # Function to make a prediction on a single image
 transform = transforms.Compose([
-        transforms.Resize(256),
-        transforms.RandomResizedCrop(224),  #random crop for more variability,increase accuracy
+        transforms.Resize(256),  
+        transforms.RandomResizedCrop(224),    
+        transforms.RandomRotation(8), #same idea
         transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1), #color transforms to increase accuracy further
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
@@ -94,9 +99,27 @@ def predict_image(image_path, model, class_names):
 model_path = './food.pth'
 _, test_loader = load_split_train_test() 
 class_names = test_loader.dataset.classes
-image_path = 'test_images/blueberry.jpeg'
+image_path = 'test_images/redapple.jpeg'  
 model = load_model(model_path, len(class_names))
 predicted_class = predict_image(image_path, model, class_names)
 print(f'Predicted class: {predicted_class}')
+"""def test(model, test_loader):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+    model.eval()  # Set the model to evaluation mode
+
+    correct = 0
+    total = 0
+
+    with torch.no_grad():  # Disable gradient calculation for efficiency
+        for inputs, labels in test_loader:
+            inputs, labels = inputs.to(device), labels.to(device)
+            outputs = model(inputs)
+            _, predicted = torch.max(outputs, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+
+    accuracy = 100 * correct / total
+    print(f'Test Accuracy: {accuracy:.2f}%')
 #comment in and out to test
-#test()
+#test(model, test_loader)"""

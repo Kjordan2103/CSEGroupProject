@@ -60,9 +60,8 @@ def train():
             loss.backward()
             optimizer.step()
             running_loss += loss.item()
-            #check every 3 batches
-            if i % (batch_size * 3) == 0:
-                print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / (batch_size * 3)}')
+            if i % (batch_size) == 0:
+                print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss}')
                 running_loss = 0.0
     print("reach end, proceeding to save...")
     path = './food.pth'

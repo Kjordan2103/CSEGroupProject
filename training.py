@@ -46,7 +46,7 @@ def train():
     model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
     criterion = torch.nn.CrossEntropyLoss()
     #Medium article says Momentum is best optimizer for ResNet, trying that now
-    optimizer = torch.optim.SGD(model.fc.parameters(), lr=0.01, momentum= 0.9) #trying parameters seen in lecture, think lr too high before
+    optimizer = torch.optim.SGD(model.fc.parameters(), lr=0.001, momentum= 0.9) #trying parameters seen in lecture, think lr too high before
     model.to(device)
     epochs = 15 #using 15 epoch for now keep monitoring 
     running_loss = 0

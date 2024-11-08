@@ -96,14 +96,14 @@ def predict_image(image_path, model, class_names):
         class_idx = predicted.item()
     return class_names[class_idx]
 
-model_path = './food.pth'
+"""model_path = './content/CSEGroupProject/food.pth'
 _, test_loader = load_split_train_test() 
 class_names = test_loader.dataset.classes
 image_path = 'test_images/redapple.jpeg'  
 model = load_model(model_path, len(class_names))
 predicted_class = predict_image(image_path, model, class_names)
 print(f'Predicted class: {predicted_class}')
-"""def test(model, test_loader):
+def test(model, test_loader):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
     model.eval()  # Set the model to evaluation mode

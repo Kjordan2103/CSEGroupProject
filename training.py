@@ -30,9 +30,10 @@ def load_split_train_test():
                    batch_size=batch_size)
     return trainloader, testloader
 ###########Remainder of logic is training logic#############
-#print(torch.cuda.is_available())  # This should return True if a GPU is available
-#print(torch.cuda.current_device())  # This will return the current GPU ID (e.g., 0 for the first GPU)
-#print(torch.cuda.get_device_name(0))  # This prints the name of the GPU, e.g., 'NVIDIA GeForce GTX 1080'
+def gpu_check():
+    print(torch.cuda.is_available())  # This should return True if a GPU is available
+    print(torch.cuda.current_device())  # This will return the current GPU ID (e.g., 0 for the first GPU)
+    print(torch.cuda.get_device_name(0))  # This prints the name of the GPU, e.g., 'NVIDIA GeForce GTX 1080'
 def train():
     trainloader, _ = load_split_train_test()
     print(trainloader.dataset.classes)

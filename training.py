@@ -120,15 +120,15 @@ transform = transforms.Compose([
         output = model(image)
         _, predicted = torch.max(output, 1)
         class_idx = predicted.item()
-    return class_names[class_idx]
+    return class_names[class_idx]"""
 
 model_path = '/content/CSEGroupProject/food.pth'
 _, _, test_loader = load_split_train_test_val() 
 class_names = test_loader.dataset.classes
 image_path = '/content/CSEGroupProject/test_images/redapple.jpeg'  
 saved_model = load_model(model_path, len(class_names))
-predicted_class = predict_image(image_path, saved_model, class_names)
-print(f'Predicted class: {predicted_class}')
+#predicted_class = predict_image(image_path, saved_model, class_names)
+#print(f'Predicted class: {predicted_class}')
 def test(model, test_loader):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
@@ -143,6 +143,6 @@ def test(model, test_loader):
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
     accuracy = 100 * correct / total
-    print(f'Test Accuracy: {accuracy:.2f}%')"""
+    print(f'Test Accuracy: {accuracy:.2f}%')
 #comment in and out to test
 #test(model, test_loader)

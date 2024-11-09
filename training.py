@@ -7,6 +7,7 @@ from torch.utils.data.sampler import SubsetRandomSampler
 import numpy as np
 from PIL import Image
 batch_size = 64
+#if not on google colab, just remove the /content/CSEGroupProject portion of each path below
 train_dir = '/content/CSEGroupProject/Fruits/fruits-360_dataset_100x100/fruits-360/Training' #path to be used for ImageFolder
 test_dir = '/content/CSEGroupProject/Fruits/fruits-360_dataset_100x100/fruits-360/Test'
 #splitting dataset into training and testing (80% used for training, rest for testing)
@@ -96,11 +97,11 @@ def predict_image(image_path, model, class_names):
         class_idx = predicted.item()
     return class_names[class_idx]
 
-"""model_path = './content/CSEGroupProject/food.pth'
+model_path = './content/CSEGroupProject/food.pth'
 _, test_loader = load_split_train_test() 
 class_names = test_loader.dataset.classes
 image_path = 'test_images/redapple.jpeg'  
-model = load_model(model_path, len(class_names))
+saved_model = load_model(model_path, len(class_names))
 predicted_class = predict_image(image_path, model, class_names)
 print(f'Predicted class: {predicted_class}')
 def test(model, test_loader):
@@ -122,4 +123,4 @@ def test(model, test_loader):
     accuracy = 100 * correct / total
     print(f'Test Accuracy: {accuracy:.2f}%')
 #comment in and out to test
-#test(model, test_loader)"""
+#test(model, test_loader)

@@ -94,7 +94,7 @@ def train():
     torch.save(model.state_dict(),path)
     print("saved model")
 #comment in and out to train below
-train()
+#train()
 def load_model(model_path, num_classes):
     model = models.resnet18(pretrained=True)
     model.fc = torch.nn.Linear(model.fc.in_features, num_classes)

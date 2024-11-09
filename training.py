@@ -8,8 +8,8 @@ import numpy as np
 from PIL import Image
 batch_size = 64
 #if not on google colab, just remove the /content/CSEGroupProject portion of each path below
-train_dir = '/content/CSEGroupProject/Fruits/fruits-360_dataset_100x100/fruits-360/Training' #path to be used for ImageFolder
-test_dir = '/content/CSEGroupProject/Fruits/fruits-360_dataset_100x100/fruits-360/Test'
+train_dir = 'Fruits/fruits-360_dataset_100x100/fruits-360/Training' #path to be used for ImageFolder
+test_dir = 'Fruits/fruits-360_dataset_100x100/fruits-360/Test'
 #splitting dataset into training, validation and testing (80% used for training, 20% used for validation, testing file for testing)
 def load_split_train_test_val(): 
     #transform parameters, using normalizations/resizes found in resnet18 documentation
@@ -26,15 +26,20 @@ def load_split_train_test_val():
     test_data = datasets.ImageFolder(test_dir,
                     transform=transform)
     #need to split train data into validation set, want 80-20 split
-    train_size = int(0.8 * len(train_data))
-    val_size = len(train_data) - train_size
-    train_data, val_dataset = torch.utils.data.random_split(train_data, [train_size, val_size]) #split the training dataset randomly to create validation set 
-    trainloader = torch.utils.data.DataLoader(train_data,
-                   batch_size=batch_size, shuffle= True)
-    valLoader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+    num_train = len(train_data)
+    indices = list(range(num_train))
+    split = int(np.floor(num_train * 0.2))
+    np.random.shuffle(indices)
+    trainIdx, valIndx = indices[split:], indices[:split]
+    train_sampler = SubsetRandomSampler(trainIdx)
+    val_sampler = SubsetRandomSampler(valIndx)
+    trainLoader = torch.utils.data.DataLoader(train_data,
+                sampler=train_sampler, batch_size=batch_size)
+    valLoader = torch.utils.data.DataLoader(train_data,
+                sampler = val_sampler, batch_size= batch_size)
     testloader = torch.utils.data.DataLoader(test_data,
-                   batch_size=batch_size, shuffle= False)
-    return trainloader, valLoader, testloader
+                batch_size=batch_size, shuffle= False)
+    return trainLoader, valLoader, testloader
 ###########Remainder of logic is training logic#############
 def gpu_check():
     print(torch.cuda.is_available())  
@@ -89,7 +94,7 @@ def train():
     torch.save(model.state_dict(),path)
     print("saved model")
 #comment in and out to train below
-#train()
+train()
 def load_model(model_path, num_classes):
     model = models.resnet18(pretrained=True)
     model.fc = torch.nn.Linear(model.fc.in_features, num_classes)

@@ -102,7 +102,7 @@ _, test_loader = load_split_train_test()
 class_names = test_loader.dataset.classes
 image_path = 'test_images/redapple.jpeg'  
 saved_model = load_model(model_path, len(class_names))
-predicted_class = predict_image(image_path, model, class_names)
+predicted_class = predict_image(image_path, saved_model, class_names)
 print(f'Predicted class: {predicted_class}')
 def test(model, test_loader):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

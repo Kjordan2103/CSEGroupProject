@@ -28,7 +28,7 @@ def load_split_train_test_val():
     #need to split train data into validation set, want 80-20 split
     train_size = int(0.8 * len(train_data))
     val_size = len(train_data) - train_size
-    train_data, val_dataset = torch.random_split(train_data, [train_size, val_size]) #split the training dataset randomly to create validation set 
+    train_data, val_dataset = torch.utils.data.random_split(train_data, [train_size, val_size]) #split the training dataset randomly to create validation set 
     trainloader = torch.utils.data.DataLoader(train_data,
                    batch_size=batch_size, shuffle= True)
     valLoader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False)

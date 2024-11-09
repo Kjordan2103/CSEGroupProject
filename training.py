@@ -97,7 +97,7 @@ def predict_image(image_path, model, class_names):
         class_idx = predicted.item()
     return class_names[class_idx]
 
-model_path = './content/CSEGroupProject/food.pth'
+model_path = '/content/CSEGroupProject/food.pth'
 _, test_loader = load_split_train_test() 
 class_names = test_loader.dataset.classes
 image_path = 'test_images/redapple.jpeg'  

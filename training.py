@@ -59,12 +59,12 @@ def train():
     #Medium article says Momentum is best optimizer for ResNet, trying that now
     optimizer = torch.optim.SGD(model.fc.parameters(), lr=0.001, momentum= 0.9) #trying parameters seen in lecture, think lr too high before
     model.to(device)
-    epochs = 17 #using 15 epoch for now keep monitoring 
+    epochs = 17 #using 17 epoch for now keep monitoring 
     running_loss = 0
     for epoch in range(epochs):
         #training step
         model.train() 
-        for i, (inputs, labels) in enumerate(trainloader,0):
+        for inputs, labels in trainloader:
             inputs, labels = inputs.to(device), labels.to(device)
             optimizer.zero_grad()
             logps = model.forward(inputs)
@@ -72,9 +72,6 @@ def train():
             loss.backward()
             optimizer.step()
             running_loss += loss.item()
-            if i % batch_size == 0:
-                print(f'[{epoch + 1}, {i + 1:5d}] average loss: {running_loss/batch_size} updated git2')
-                running_loss = 0.0
         #validation step
         model.eval()
         val_loss = 0.0

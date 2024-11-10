@@ -87,7 +87,7 @@ def train():
                 total += labels.size(0)
                 correct += predicted.eq(labels).sum().item()
         valAccuracy = 100 * correct / total
-        print(f'Epoch {epoch+1}, Train Loss: {running_loss/batch_size}, Val Loss: {val_loss/batch_size}, Val Accuracy: {valAccuracy:.2f}%')
+        print(f'Epoch {epoch+1}, Train Loss: {running_loss/len(trainloader)}, Val Loss: {val_loss/len(valLoader)}, Val Accuracy: {valAccuracy:.2f}%')
     print("reach end, proceeding to save...")
     path = './food.pth'
     torch.save(model.state_dict(),path)

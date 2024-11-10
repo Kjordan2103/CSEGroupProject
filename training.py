@@ -59,7 +59,7 @@ def train():
     #Medium article says Momentum is best optimizer for ResNet, trying that now
     optimizer = torch.optim.SGD(model.fc.parameters(), lr=0.001, momentum= 0.9) #trying parameters seen in lecture, think lr too high before
     model.to(device)
-    epochs = 15 #using 15 epoch for now keep monitoring 
+    epochs = 17 #using 15 epoch for now keep monitoring 
     running_loss = 0
     for epoch in range(epochs):
         #training step
@@ -89,6 +89,8 @@ def train():
                 _, predicted = outputs.max(1)
                 total += labels.size(0)
                 correct += predicted.eq(labels).sum().item()
+        valAccuracy = 100 * correct / total
+        print(f'Epoch {epoch+1}, Train Loss: {running_loss/batch_size}, Val Loss: {val_loss/batch_size}, Val Accuracy: {valAccuracy:.2f}%')
     print("reach end, proceeding to save...")
     path = './food.pth'
     torch.save(model.state_dict(),path)

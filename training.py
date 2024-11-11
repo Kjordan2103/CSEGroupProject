@@ -41,7 +41,10 @@ def load_split_train_test_val():
                 batch_size=batch_size, shuffle= False)
     return trainLoader, valLoader, testloader
 ###########Remainder of logic is training logic#############
-
+#use to check gpu in google colab
+def gpu_check():
+    print(torch.cuda.is_available())  
+    print(torch.cuda.get_device_name(0)) 
 def train():
     #function returns in order of train, val, test
     trainloader, valLoader, _ = load_split_train_test_val()

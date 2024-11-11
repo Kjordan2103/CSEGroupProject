@@ -9,7 +9,7 @@ from PIL import Image
 batch_size = 32
 #if not on google colab, just remove the /content/CSEGroupProject portion of each path below
 train_dir = '/content/CSEGroupProject/Fruits/fruits-360_dataset_100x100/fruits-360/Training' #path to be used for ImageFolder
-test_dir = '/content/CSEGroupProjectFruits/fruits-360_dataset_100x100/fruits-360/Test'
+test_dir = '/content/CSEGroupProject/Fruits/fruits-360_dataset_100x100/fruits-360/Test'
 #splitting dataset into training, validation and testing (80% used for training, 20% used for validation, testing file for testing)
 def load_split_train_test_val(): 
     #transform parameters, using normalizations/resizes found in resnet18 documentation

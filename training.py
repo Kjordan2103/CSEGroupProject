@@ -6,10 +6,10 @@ import torchvision.models as models
 from torch.utils.data.sampler import SubsetRandomSampler
 import numpy as np
 from PIL import Image
-batch_size = 64
+batch_size = 32
 #if not on google colab, just remove the /content/CSEGroupProject portion of each path below
 train_dir = '/content/CSEGroupProject/Fruits/fruits-360_dataset_100x100/fruits-360/Training' #path to be used for ImageFolder
-test_dir = '/content/CSEGroupProject/Fruits/fruits-360_dataset_100x100/fruits-360/Test'
+test_dir = '/content/CSEGroupProjectFruits/fruits-360_dataset_100x100/fruits-360/Test'
 #splitting dataset into training, validation and testing (80% used for training, 20% used for validation, testing file for testing)
 def load_split_train_test_val(): 
     #transform parameters, using normalizations/resizes found in resnet18 documentation
@@ -41,10 +41,7 @@ def load_split_train_test_val():
                 batch_size=batch_size, shuffle= False)
     return trainLoader, valLoader, testloader
 ###########Remainder of logic is training logic#############
-def gpu_check():
-    print(torch.cuda.is_available())  
-    print(torch.cuda.current_device()) 
-    print(torch.cuda.get_device_name(0)) 
+
 def train():
     #function returns in order of train, val, test
     trainloader, valLoader, _ = load_split_train_test_val()
@@ -59,7 +56,7 @@ def train():
     #Medium article says Momentum is best optimizer for ResNet, trying that now
     optimizer = torch.optim.SGD(model.fc.parameters(), lr=0.001, momentum= 0.9) #trying parameters seen in lecture, think lr too high before
     model.to(device)
-    epochs = 17 #using 17 epoch for now keep monitoring 
+    epochs = 20 #using 30 epoch for now keep monitoring 
     running_loss = 0
     for epoch in range(epochs):
         #training step
@@ -94,12 +91,11 @@ def train():
     print("saved model")
 #comment in and out to train below
 #train()
-def load_model(model_path, num_classes):
+"""def load_model(model_path, num_classes):
     model = models.resnet18(pretrained=True)
     model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.load_state_dict(torch.load(model_path), device)
-    model.eval()  # Set to evaluation mode
     return model
 ########### New Test Function ###########
 # Function to make a prediction on a single image
@@ -111,7 +107,7 @@ transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
-"""def predict_image(image_path, model, class_names):
+def predict_image(image_path, model, class_names):
     image = Image.open(image_path).convert("RGB")
     image = transform(image)
     image = image.unsqueeze(0)
@@ -119,15 +115,15 @@ transform = transforms.Compose([
         output = model(image)
         _, predicted = torch.max(output, 1)
         class_idx = predicted.item()
-    return class_names[class_idx]"""
+    return class_names[class_idx]
 
-model_path = '/content/CSEGroupProject/food.pth'
+model_path = './food.pth'
 _, _, test_loader = load_split_train_test_val() 
 class_names = test_loader.dataset.classes
-image_path = '/content/CSEGroupProject/test_images/redapple.jpeg'  
+image_path = '/test_images/redapple.jpeg'  
 saved_model = load_model(model_path, len(class_names))
-#predicted_class = predict_image(image_path, saved_model, class_names)
-#print(f'Predicted class: {predicted_class}')
+predicted_class = predict_image(image_path, saved_model, class_names)
+print(f'Predicted class: {predicted_class}')
 def test(model, test_loader):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
@@ -144,4 +140,4 @@ def test(model, test_loader):
     accuracy = 100 * correct / total
     print(f'Test Accuracy: {accuracy:.2f}%')
 #comment in and out to test
-#test(model, test_loader)
+#test(model, test_loader)"""

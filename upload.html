@@ -1,12 +1,97 @@
+<!-- Launch this through "python -m http.server 8000" -->
 <!DOCTYPE html>
 <html>
 <head>
-<title>Page Title</title>
+    <title>Fruits and Vegetable Identifier</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        #upload-btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        #upload-btn:hover {
+            background-color: #45a049;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        img {
+            margin-top: 20px;
+            max-width: 300px;
+            display: none; 
+        }
+    </style>
 </head>
 <body>
 
-<h1>This is a Heading</h1>
-<p>This is a paragraph.</p>
+<h1>Fruits and Vegetable Identifier</h1>
+
+<label for="file-input" id="upload-btn">Upload</label>
+<input type="file" id="file-input" accept="image/*">
+
+<img id="image-preview" src="" alt="Uploaded Image Preview">
+
+<p id="response"></p>
+
+<script>
+    const fileInput = document.getElementById('file-input');
+    const imagePreview = document.getElementById('image-preview');
+    const responseText = document.getElementById('response');
+
+    fileInput.addEventListener('change', function(event) {
+        const file = event.target.files[0]; 
+
+        if (file) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block'; 
+            }
+
+            reader.readAsDataURL(file); 
+        }
+        // Send image to backend
+        const formData = new FormData();
+        formData.append('image', file);
+
+        fetch('http://localhost:8000/', { // Adjust this to be the actual backend file we make
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            responseText.innerHTML = 'Prediction: ' + data.prediction;
+        })
+        .catch(error => {
+            responseText.innerHTML = 'Error: ' + error;
+        });
+    });
+</script>
 
 </body>
 </html>

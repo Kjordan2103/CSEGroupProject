@@ -13,11 +13,13 @@ def load_split_train_test():
     #transform parameters, using normalizations/resizes found in resnet18 documentation
     #many random transofmrations on the training set
     train_transform = transforms.Compose([
-        transforms.Resize(256),  
-        transforms.RandomResizedCrop(224),    
-        transforms.RandomRotation(15), 
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    transforms.Resize(256),
+    transforms.RandomResizedCrop(224),
+    transforms.RandomHorizontalFlip(),  # Flip images horizontally
+    transforms.RandomRotation(20),     # Rotate images randomly
+    transforms.ColorJitter(0.2, 0.2, 0.2, 0.1),  # Randomly adjust brightness, contrast, etc.
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
     test_transform = transforms.Compose([
         transforms.Resize(256),
@@ -53,11 +55,13 @@ def train():
     num_classes = len(trainloader.dataset.classes)
     #need to define nn as a linear space and give loss functions (cross entropy best for multi-class)
     model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
+    class_weights = torch.tensor([weight_per_class]).to(device)
+    criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
     criterion = torch.nn.CrossEntropyLoss()
     #Medium article says Momentum is best optimizer for ResNet, trying that now
     optimizer = torch.optim.SGD(model.fc.parameters(), lr=0.001, momentum= 0.9) #trying parameters seen in lecture, think lr too high before
     model.to(device)
-    epochs = 100 #using 100 epoch for now keep monitoring 
+    epochs = 150 #using 150 epoch for now keep monitoring 
     print("starting training...")
     running_loss = 0
     for epoch in range(epochs):
@@ -83,8 +87,8 @@ def train():
         val_loss = 0.0
         correct = 0
         total = 0
-        #CHECK WITH VALIDATOR EVERY 3 EPOCHS
-        if (epoch + 1) % 3 == 0:
+        #CHECK WITH VALIDATOR EVERY 10 EPOCHS
+        if (epoch + 1) % 10 == 0:
             with torch.no_grad():
                 for inputs, labels in valLoader:
                     inputs, labels = inputs.to(device), labels.to(device)
@@ -103,7 +107,7 @@ def train():
     torch.save(model.state_dict(),path)
     print("saved model")
 #comment in and out to train below
-train()
+#train()
 def load_model(model_path, num_classes):
     model = models.resnet18()
     model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
@@ -118,23 +122,27 @@ transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
-"""def predict_image(image_path, model, class_names):
+def predict_image(image_path, model, class_names):
     image = Image.open(image_path).convert("RGB")
     image = transform(image)
-    image = image.unsqueeze(0)
+    image = image.unsqueeze(0)  # Add batch dimension
+    model.eval()  # Set the model to evaluation mode
     with torch.no_grad():
         output = model(image)
-        _, predicted = torch.max(output, 1)
-        class_idx = predicted.item()
-    return class_names[class_idx]"""
+        probabilities = torch.nn.functional.softmax(output, dim=1)
+        top_p, top_class = probabilities.topk(1, dim=1)
+        class_idx = top_class.item()
+        confidence = top_p.item()
+    return class_names[class_idx], confidence
 
 model_path = './food.pth'
 _, test_loader = load_split_train_test() 
 class_names = test_loader.dataset.classes
-image_path = 'test_images/greenpear.jpeg'  
+#image_path = 'Fruits/fruits-360_dataset_100x100/fruits-360/Test/Carambula 1/83_100.jpg'  
+image_path = 'test_images/redmango.jpeg'
 saved_model = load_model(model_path, len(class_names))
-#predicted_class = predict_image(image_path, saved_model, class_names)
-#print(f'Predicted class: {predicted_class}')
+predicted_class = predict_image(image_path, saved_model, class_names)
+print(f'Predicted class: {predicted_class}')
 def test(model, test_loader):
     device = torch.device("mps" if torch.mps.is_available() else "cpu")
     model.to(device)

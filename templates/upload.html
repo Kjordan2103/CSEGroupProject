@@ -1,0 +1,92 @@
+<!-- Launch this through "python -m http.server 8000" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Fruit Nutrition Classifier</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Classify fruits and get their nutrition details.">
+    <style>
+        /* want everthing centered on screen */
+        body {
+            font-family: Arial;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f8f9fa;
+        }
+
+        h1 {
+            color: #343a40;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+
+        input[type="file"] {
+            margin-bottom: 15px;
+            padding: 5px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .output {
+            margin-top: 20px;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            color: #721c24;
+            display: none; /* Hidden by default */
+        }
+    </style>
+</head>
+<body>
+    <h1>Fruit Nutrition Calculator</h1>
+    <p>Upload an image of fruit, and we will give you its nutrition facts!</p>
+
+    <form id="Image_Upload" action="/upload" method="POST" enctype="multipart/form-data">
+        <input type="file" id="file" name="file" accept="image/*" required>
+        <button type="submit">Classify Fruit</button>
+    </form>
+
+    <p id="output"></p>
+    <script>
+
+        const form = document.getElementById('Image_Upload');
+        const result = document.getElementById('output');
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const formData = new FormData();
+            const fileInput = document.getElementById('file');
+            formData.append('image', fileInput.files[0]);
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const data = await response.json();
+                result.textContent = `Prediction: ${data.class}`;
+
+            } catch (error) {
+                result.textContent = `Error: ${error.message}`;
+            }
+        });
+    </script>
+
+
+</body>
+</html>

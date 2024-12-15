@@ -81,12 +81,11 @@ def get_image():
         output = model(image)
         _, predicted = torch.max(output, 1)
         class_idx = predicted.item()
-    return jsonify({'class': class_names[class_idx]})
+    return jsonify({'class': class_names[class_idx].split()[0]})
 
 @app.route('/nutrition', methods=['GET'])
 def get_nutrition():
-    fruit = request.args.get('fruit')
-    
+    fruit = request.args.get('fruit').split()[0]
     if fruit in NutritionalDataSet.dataset:
         nutrition = NutritionalDataSet.dataset[fruit]
         return jsonify(nutrition)

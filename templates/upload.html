@@ -1,46 +1,44 @@
 <!-- Launch this through "python -m http.server 8000" -->
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <title>Fruit Nutrition Classifier</title>
+    <title>Fruit Nutrition Calculator/Classifier</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Classify fruits and get their nutrition details.">
     <style>
-        /* want everthing centered on screen */
         body {
-            font-family: Arial;
-            margin: 0;
-            padding: 0;
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             height: 100vh;
-            background-color: #f8f9fa;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
         }
-
         h1 {
-            color: #343a40;
-            margin-bottom: 10px;
-        }
-
-        p {
-            color: #6c757d;
+            font-size: 36px;
             margin-bottom: 20px;
         }
-
-        input[type="file"] {
-            margin-bottom: 15px;
-            padding: 5px;
+        img {
+            margin-top: 20px;
+            max-width: 300px;
+            display: none; 
         }
-
         button {
-            background-color: #007bff;
+            padding: 15px 30px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #4CAF50;
             color: white;
             border: none;
-            cursor: pointer;
-            font-size: 16px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #45a049;
         }
         .output {
             margin-top: 20px;
@@ -56,37 +54,78 @@
     <h1>Fruit Nutrition Calculator</h1>
     <p>Upload an image of fruit, and we will give you its nutrition facts!</p>
 
-    <form id="Image_Upload" action="/upload" method="POST" enctype="multipart/form-data">
-        <input type="file" id="file" name="file" accept="image/*" required>
+    <form id="Image_Upload" action="/classify" method="POST" enctype="multipart/form-data">
+        <input type="file" id="file-input" name="file" accept="image/*" required>
         <button type="submit">Classify Fruit</button>
     </form>
 
-    <p id="output"></p>
+    <img id="image-preview" alt="Image Preview">
+
+    <div id="output"><span id="prediction"></span></div>
+
+    <div id="nutritionInfoDiv"></div>
+
     <script>
+        const fileInput = document.getElementById('file-input');
+        const imagePreview = document.getElementById('image-preview');
+        const responseText = document.getElementById('response');
+        const predictionText = document.getElementById('prediction');
+        const form = document.getElementById('Image_Upload')
+        const nutritionInfoDiv= document.getElementById('nutritionInfoDiv')
 
-        const form = document.getElementById('Image_Upload');
-        const result = document.getElementById('output');
         form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const formData = new FormData();
-            const fileInput = document.getElementById('file');
-            formData.append('image', fileInput.files[0]);
+            event.preventDefault()
 
-            try {
-                const response = await fetch('http://127.0.0.1:5000/upload', {
-                    method: 'POST',
-                    body: formData,
-                });
 
-                const data = await response.json();
-                result.textContent = `Prediction: ${data.class}`;
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
 
-            } catch (error) {
-                result.textContent = `Error: ${error.message}`;
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
             }
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            fetch('http://127.0.0.1:5000/classify', {  //this probably needs to change
+                method: 'POST',
+                body: formData
+            })
+
+            .then(response => response.json())
+            .then(data => {
+                const fruitPrediction=data.class
+                predictionText.innerHTML=`<h2>${fruitPrediction}</h2>`
+                fetch(`http://127.0.0.1:5000/nutrition?fruit=${data.class}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(nutritionData => {
+                    nutritionInfoDiv.innerHTML = `
+                        <h2>Nutrition Facts for ${fruitPrediction}:</h2>
+                        <p><strong>Serving Size:</strong> ${nutritionData['serving size']}</p>
+                        <p><strong>Calories:</strong> ${nutritionData.calories}</p>
+                        <p><strong>Total Fat:</strong> ${nutritionData['total fat']}</p>
+                        <p><strong>Protein:</strong> ${nutritionData.protein}</p>
+                        <p><strong>Carbohydrates:</strong> ${nutritionData.carbs}</p>
+                    `;
+                })
+                .catch(error => {
+                    responseText.innerHTML = 'Error fetching nutrition: ' + error;
+                });
+            })
+            .catch(error => {
+                responseText.innerHTML = 'Error: ' + error;
+            });
         });
     </script>
-
-
 </body>
 </html>
+

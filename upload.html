@@ -27,12 +27,18 @@
             display: none; 
         }
         button {
-            margin-top: 10px;
-            padding: 0;
-            background-color: #007bff;
-            color: white;
-            font-size: 16px;
+            padding: 15px 30px;
+            font-size: 18px;
             cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #45a049;
         }
         .output {
             margin-top: 20px;
@@ -69,16 +75,38 @@
                 }
                 reader.readAsDataURL(file); 
             }
-            // Send image to backend
             const formData = new FormData();
             formData.append('image', file);
-            fetch('http://localhost:8000/', { // Adjust this to be the actual backend file we make
+            
+            fetch('http://localhost:8000/classify', {  //this probably needs to change
                 method: 'POST',
                 body: formData
             })
             .then(response => response.json())
             .then(data => {
-                responseText.innerHTML = 'Prediction: ' + data.prediction;
+                const fruitPrediction = data.prediction;
+                predictionText.innerHTML = fruitPrediction;
+
+                fetch(`http://localhost:8000/nutrition?fruit=${fruitPrediction}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(nutritionData => {
+                    nutritionInfoDiv.innerHTML = `
+                        <h2>Nutrition Facts for ${fruitPrediction}:</h2>
+                        <p><strong>Serving Size:</strong> ${nutritionData['serving size']}</p>
+                        <p><strong>Calories:</strong> ${nutritionData.calories}</p>
+                        <p><strong>Total Fat:</strong> ${nutritionData['total fat']}</p>
+                        <p><strong>Protein:</strong> ${nutritionData.protein}</p>
+                        <p><strong>Carbohydrates:</strong> ${nutritionData.carbs}</p>
+                    `;
+                })
+                .catch(error => {
+                    responseText.innerHTML = 'Error fetching nutrition: ' + error;
+                });
             })
             .catch(error => {
                 responseText.innerHTML = 'Error: ' + error;

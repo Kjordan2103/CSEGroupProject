@@ -4,6 +4,8 @@ import torch
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
+import NutritionalDataSet  # Assuming this file contains the dataset
+
 
 app = Flask(__name__)
 
@@ -69,7 +71,7 @@ model.to(device)
 model.eval()
 
 
-@app.route('/upload',methods=['POST'])
+@app.route('/classify',methods=['POST'])
 def get_image():
     file = request.files['image']
     image= Image.open(file.stream).convert("RGB")
@@ -81,10 +83,19 @@ def get_image():
         class_idx = predicted.item()
     return jsonify({'class': class_names[class_idx]})
 
+@app.route('/nutrition', methods=['GET'])
+def get_nutrition():
+    fruit = request.args.get('fruit')
+    
+    if fruit in NutritionalDataSet.dataset:
+        nutrition = NutritionalDataSet.dataset[fruit]
+        return jsonify(nutrition)
+    else:
+        return jsonify({"error": "Fruit not found in dataset"}), 404
+
 @app.route('/')
 def get():
     return render_template('upload.html')
-
 
 
 if __name__ == '__main__':
